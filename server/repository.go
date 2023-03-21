@@ -3,6 +3,7 @@ package server
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -19,6 +20,20 @@ type Kitchen struct {
 	WebsiteLink NullString `json:"website_link"`
 	ParentID    NullInt64  `json:"parent_id"`
 	Type        string     `json:"type"`
+}
+
+func CreateOneRowPayload(v any) ([]byte, error) {
+	marshalJSON, err := json.Marshal(v)
+
+	if err != nil {
+		return nil, errors.New("failed to marshal when creating one row payload")
+	}
+
+	payload := string(marshalJSON)
+
+	payload = payload[1 : len(payload)-1]
+
+	return []byte(payload), nil
 }
 
 // NullInt64 is an alias for sql.NullInt64 data type

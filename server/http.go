@@ -72,10 +72,10 @@ func (s *Server) KitchenById(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	payload, err := json.Marshal(kitchens)
+	payload, err := CreateOneRowPayload(kitchens)
 
 	if err != nil {
-		log.Println("Failed to marshal:", err)
+		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
