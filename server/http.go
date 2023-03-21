@@ -3,9 +3,11 @@ package server
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	_ "github.com/lib/pq"
 )
 
@@ -50,5 +52,33 @@ func (s *Server) Kitchens(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(payload)
+}
 
+func (s *Server) KitchenById(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	var kitchens []Kitchen
+	var kitchen Kitchen
+
+	row := s.DB.QueryRow("SELECT * FROM kitchens WHERE id = $1", id)
+
+	switch err := row.Scan(&kitchen.ID, &kitchen.CreatedAt, &kitchen.UpdatedAt, &kitchen.Name, &kitchen.Logo, &kitchen.Description, &kitchen.WebsiteLink, &kitchen.ParentID, &kitchen.Type); err {
+	case sql.ErrNoRows:
+		fmt.Println("No rows were returned!")
+	case nil:
+		fmt.Println(kitchen)
+		kitchens = append(kitchens, kitchen)
+	default:
+		panic(err)
+	}
+
+	payload, err := json.Marshal(kitchens)
+
+	if err != nil {
+		log.Println("Failed to marshal:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(payload)
 }

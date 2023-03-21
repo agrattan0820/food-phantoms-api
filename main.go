@@ -52,5 +52,6 @@ func main() {
 		w.Write([]byte("Hello World!"))
 	})
 	r.Get("/kitchens", s.Kitchens)
+	r.Get("/kitchen/{id}", s.KitchenById)
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
