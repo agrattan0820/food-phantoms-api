@@ -2,12 +2,12 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"time"
+
+	"food-phantoms-api/server"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -15,82 +15,6 @@ import (
 
 	_ "github.com/lib/pq"
 )
-
-var stats = map[string]int{}
-var calls []string
-
-type server struct {
-	db *sql.DB
-}
-
-type Kitchen struct {
-	ID          int8           `json:"id"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	Name        string         `json:"name"`
-	Logo        sql.NullString `json:"logo"`
-	Description sql.NullString `json:"description"`
-	WebsiteLink sql.NullString `json:"website_link"`
-	ParentID    sql.NullInt16  `json:"parent_id"`
-	Type        string         `json:"type"`
-}
-
-func (s *server) hello(w http.ResponseWriter, r *http.Request) {
-	name := r.URL.Query().Get("name")
-
-	if name == "" {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	calls = append(calls, name)
-	stats[name]++
-
-	fmt.Printf("calls: %#v\n", calls)
-	fmt.Printf("stats: %#v\n\n", stats)
-
-	fmt.Fprint(w, "Hello, ", name)
-}
-
-func (s *server) kitchens(w http.ResponseWriter, r *http.Request) {
-
-	var kitchens []Kitchen
-
-	rows, err := s.db.Query("SELECT * FROM kitchens")
-	if err != nil {
-		log.Fatalln(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var kitchen Kitchen
-		if err := rows.Scan(&kitchen.ID, &kitchen.CreatedAt, &kitchen.UpdatedAt, &kitchen.Name, &kitchen.Logo, &kitchen.Description, &kitchen.WebsiteLink, &kitchen.ParentID, &kitchen.Type); err != nil {
-			log.Fatalln(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		kitchens = append(kitchens, kitchen)
-	}
-
-	if kitchens == nil {
-		w.WriteHeader(404)
-		w.Write([]byte("kitchens not found"))
-		return
-	}
-
-	payload, err := json.Marshal(kitchens)
-
-	if err != nil {
-		log.Println("Failed to marshal:", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(payload)
-
-}
 
 func main() {
 	// Load .env file
@@ -109,15 +33,15 @@ func main() {
 	defer db.Close()
 
 	// Set up server
-	s := server{db: db}
+	s := server.Server{DB: db}
 
 	// Test db by sending a ping
-	pingErr := s.db.Ping()
+	pingErr := s.DB.Ping()
 	if pingErr != nil {
 		log.Fatal(pingErr)
 	}
 	fmt.Println("Starting server on :8080...")
-	fmt.Println("Connected!")
+	fmt.Println("Connected! http://localhost:8080")
 
 	// Set up chi router
 	r := chi.NewRouter()
@@ -127,7 +51,6 @@ func main() {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello World!"))
 	})
-	r.Get("/hello", s.hello)
-	r.Get("/kitchens", s.kitchens)
+	r.Get("/kitchens", s.Kitchens)
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
