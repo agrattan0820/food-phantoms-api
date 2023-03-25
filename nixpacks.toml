@@ -1,0 +1,10 @@
+providers = ["go"]
+
+[phases.install]
+cmds = ["go get"]
+
+[phases.build]
+cmds = ["go build -o out"]
+
+[start]
+cmd = "./out"
