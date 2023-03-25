@@ -19,7 +19,7 @@ func (s *Server) Kitchens(w http.ResponseWriter, r *http.Request) {
 
 	var kitchens []Kitchen
 
-	rows, err := s.DB.Query("SELECT * FROM kitchens")
+	rows, err := s.DB.Query("SELECT k.*, c.name AS \"parent_name\", c.website_link AS \"parent_link\" FROM kitchens k LEFT JOIN companies c ON k.parent_id = c.id")
 	if err != nil {
 		log.Fatalln(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -29,7 +29,7 @@ func (s *Server) Kitchens(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var kitchen Kitchen
-		if err := rows.Scan(&kitchen.ID, &kitchen.CreatedAt, &kitchen.UpdatedAt, &kitchen.Name, &kitchen.Logo, &kitchen.Description, &kitchen.WebsiteLink, &kitchen.ParentID, &kitchen.Type, &kitchen.Slug); err != nil {
+		if err := rows.Scan(&kitchen.ID, &kitchen.CreatedAt, &kitchen.UpdatedAt, &kitchen.Name, &kitchen.Logo, &kitchen.Description, &kitchen.WebsiteLink, &kitchen.ParentID, &kitchen.Type, &kitchen.Slug, &kitchen.ParentName, &kitchen.ParentLink); err != nil {
 			log.Fatalln(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
