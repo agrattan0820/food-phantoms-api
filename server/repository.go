@@ -3,8 +3,8 @@ package server
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -20,20 +20,47 @@ type Kitchen struct {
 	WebsiteLink NullString `json:"website_link"`
 	ParentID    NullInt64  `json:"parent_id"`
 	Type        string     `json:"type"`
+	Slug        string     `json:"slug"`
+	ParentName  NullString `json:"parent_name"`
+	ParentLink  NullString `json:"parent_link"`
 }
 
-func CreateOneRowPayload(v any) ([]byte, error) {
-	marshalJSON, err := json.Marshal(v)
+type Location struct {
+	ID           int8       `json:"id"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
+	KitchenID    int8       `json:"kitchen_id"`
+	Address1     string     `json:"address_1"`
+	Address2     NullString `json:"address_2"`
+	City         string     `json:"city"`
+	State        string     `json:"state"`
+	Country      string     `json:"country"`
+	ZipCode      string     `json:"zip_code"`
+	GoogleRating string     `json:"google_rating"`
+}
+type Company struct {
+	ID          int8       `json:"id"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
+	Name        string     `json:"name"`
+	Description NullString `json:"description"`
+	Logo        NullString `json:"logo"`
+	WebsiteLink NullString `json:"website_link"`
+}
 
-	if err != nil {
-		return nil, errors.New("failed to marshal when creating one row payload")
-	}
+type KitchenByIdPayload struct {
+	Kitchen                []Kitchen  `json:"kitchen"`
+	Locations              []Location `json:"locations"`
+	CompaniesKitchenRunsIn []Company  `json:"runs_in"`
+}
 
-	payload := string(marshalJSON)
+func TrimKitchen(b []byte) []byte {
+	s := string(b)
 
-	payload = payload[1 : len(payload)-1]
+	trimLeft := strings.Replace(s, "[", "", 1)
+	t := strings.Replace(trimLeft, "]", "", 1)
 
-	return []byte(payload), nil
+	return []byte(t)
 }
 
 // NullInt64 is an alias for sql.NullInt64 data type

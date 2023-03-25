@@ -29,7 +29,7 @@ func (s *Server) Kitchens(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var kitchen Kitchen
-		if err := rows.Scan(&kitchen.ID, &kitchen.CreatedAt, &kitchen.UpdatedAt, &kitchen.Name, &kitchen.Logo, &kitchen.Description, &kitchen.WebsiteLink, &kitchen.ParentID, &kitchen.Type); err != nil {
+		if err := rows.Scan(&kitchen.ID, &kitchen.CreatedAt, &kitchen.UpdatedAt, &kitchen.Name, &kitchen.Logo, &kitchen.Description, &kitchen.WebsiteLink, &kitchen.ParentID, &kitchen.Type, &kitchen.Slug); err != nil {
 			log.Fatalln(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -60,9 +60,14 @@ func (s *Server) KitchenById(w http.ResponseWriter, r *http.Request) {
 	var kitchens []Kitchen
 	var kitchen Kitchen
 
-	row := s.DB.QueryRow("SELECT * FROM kitchens WHERE id = $1", id)
+	var locations []Location
 
-	switch err := row.Scan(&kitchen.ID, &kitchen.CreatedAt, &kitchen.UpdatedAt, &kitchen.Name, &kitchen.Logo, &kitchen.Description, &kitchen.WebsiteLink, &kitchen.ParentID, &kitchen.Type); err {
+	var companiesKitchenRunsIn []Company
+
+	// Query for kitchen and its parent
+	row := s.DB.QueryRow("SELECT k.*, c.name AS \"parent_name\", c.website_link AS \"parent_link\" FROM kitchens k LEFT JOIN companies c ON k.parent_id = c.id WHERE k.id = $1", id)
+
+	switch err := row.Scan(&kitchen.ID, &kitchen.CreatedAt, &kitchen.UpdatedAt, &kitchen.Name, &kitchen.Logo, &kitchen.Description, &kitchen.WebsiteLink, &kitchen.ParentID, &kitchen.Type, &kitchen.Slug, &kitchen.ParentName, &kitchen.ParentLink); err {
 	case sql.ErrNoRows:
 		fmt.Println("No rows were returned!")
 	case nil:
@@ -72,13 +77,65 @@ func (s *Server) KitchenById(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	payload, err := CreateOneRowPayload(kitchens)
+	// Query for locations
+	rows, err := s.DB.Query("SELECT * FROM locations WHERE kitchen_id = $1", id)
+	if err != nil {
+		log.Fatalln(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var location Location
+		if err := rows.Scan(&location.ID, &location.CreatedAt, &location.UpdatedAt, &location.KitchenID, &location.City, &location.State, &location.Country, &location.ZipCode, &location.GoogleRating, &location.Address1, &location.Address2); err != nil {
+			log.Fatalln(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		locations = append(locations, location)
+	}
+
+	// Query for runs-in companies
+	rows, err = s.DB.Query("SELECT c.* FROM kitchen_runs_in_company kc JOIN companies c ON kc.company_id = c.id WHERE kitchen_id = $1", id)
+	if err != nil {
+		log.Fatalln(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var company Company
+		if err := rows.Scan(&company.ID, &company.CreatedAt, &company.UpdatedAt, &company.Name, &company.Description, &company.Logo, &company.WebsiteLink); err != nil {
+			log.Fatalln(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		companiesKitchenRunsIn = append(companiesKitchenRunsIn, company)
+	}
 
 	if err != nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	setupPayload := KitchenByIdPayload{
+		Kitchen:                kitchens,
+		Locations:              locations,
+		CompaniesKitchenRunsIn: companiesKitchenRunsIn,
+	}
+
+	payload, err := json.Marshal(setupPayload)
+
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	payload = TrimKitchen(payload)
 
 	w.Write(payload)
 }
