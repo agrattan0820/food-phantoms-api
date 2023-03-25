@@ -54,13 +54,15 @@ type KitchenByIdPayload struct {
 	CompaniesKitchenRunsIn []Company  `json:"runs_in"`
 }
 
+// Edits payload of kitchen in `KitchenById` so that it is not in an array
+// We Marshal it within an array so that the null database fields are marshaled correctly
 func TrimKitchen(b []byte) []byte {
 	s := string(b)
 
-	trimLeft := strings.Replace(s, "[", "", 1)
-	t := strings.Replace(trimLeft, "]", "", 1)
+	trimLeftBracket := strings.Replace(s, "[", "", 1)
+	trimRightBracket := strings.Replace(trimLeftBracket, "]", "", 1)
 
-	return []byte(t)
+	return []byte(trimRightBracket)
 }
 
 // NullInt64 is an alias for sql.NullInt64 data type
