@@ -51,6 +51,9 @@ func main() {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello World!"))
 	})
+	r.Get("/ping", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("pong"))
+	})
 	r.Get("/kitchens", s.Kitchens)
 	r.Get("/kitchen/{id}", s.KitchenById)
 	log.Fatal(http.ListenAndServe(":8080", r))
