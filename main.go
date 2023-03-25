@@ -42,8 +42,15 @@ func main() {
 	if pingErr != nil {
 		log.Fatal(pingErr)
 	}
-	fmt.Println("Starting server on :8080...")
-	fmt.Println("Connected! http://localhost:8080")
+
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = "8080"
+	}
+
+	fmt.Println("Starting server on :" + port + "...")
+	fmt.Println("Connected! http://localhost:" + port)
 
 	// Set up chi router
 	r := chi.NewRouter()
@@ -58,5 +65,5 @@ func main() {
 	})
 	r.Get("/kitchens", s.Kitchens)
 	r.Get("/kitchen/{id}", s.KitchenById)
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Fatal(http.ListenAndServe(":"+port, r))
 }
