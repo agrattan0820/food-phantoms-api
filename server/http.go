@@ -54,8 +54,8 @@ func (s *Server) Kitchens(w http.ResponseWriter, r *http.Request) {
 	w.Write(payload)
 }
 
-func (s *Server) KitchenById(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
+func (s *Server) KitchenBySlug(w http.ResponseWriter, r *http.Request) {
+	slug := chi.URLParam(r, "slug")
 
 	var kitchens []Kitchen
 	var kitchen Kitchen
@@ -65,7 +65,7 @@ func (s *Server) KitchenById(w http.ResponseWriter, r *http.Request) {
 	var companiesKitchenRunsIn []Company
 
 	// Query for kitchen and its parent
-	row := s.DB.QueryRow("SELECT k.*, c.name AS \"parent_name\", c.website_link AS \"parent_link\" FROM kitchens k LEFT JOIN companies c ON k.parent_id = c.id WHERE k.id = $1", id)
+	row := s.DB.QueryRow("SELECT k.*, c.name AS \"parent_name\", c.website_link AS \"parent_link\" FROM kitchens k LEFT JOIN companies c ON k.parent_id = c.id WHERE k.slug = $1", slug)
 
 	switch err := row.Scan(&kitchen.ID, &kitchen.CreatedAt, &kitchen.UpdatedAt, &kitchen.Name, &kitchen.Logo, &kitchen.Description, &kitchen.WebsiteLink, &kitchen.ParentID, &kitchen.Type, &kitchen.Slug, &kitchen.ParentName, &kitchen.ParentLink); err {
 	case sql.ErrNoRows:
@@ -78,7 +78,7 @@ func (s *Server) KitchenById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Query for locations
-	rows, err := s.DB.Query("SELECT * FROM locations WHERE kitchen_id = $1", id)
+	rows, err := s.DB.Query("SELECT * FROM locations WHERE kitchen_id = $1", kitchen.ID)
 	if err != nil {
 		log.Fatalln(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -97,7 +97,7 @@ func (s *Server) KitchenById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Query for runs-in companies
-	rows, err = s.DB.Query("SELECT c.* FROM kitchen_runs_in_company kc JOIN companies c ON kc.company_id = c.id WHERE kitchen_id = $1", id)
+	rows, err = s.DB.Query("SELECT c.* FROM kitchen_runs_in_company kc JOIN companies c ON kc.company_id = c.id WHERE kitchen_id = $1", kitchen.ID)
 	if err != nil {
 		log.Fatalln(err)
 		w.WriteHeader(http.StatusInternalServerError)

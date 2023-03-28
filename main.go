@@ -64,6 +64,6 @@ func main() {
 		w.Write([]byte("pong"))
 	})
 	r.Get("/kitchens", s.Kitchens)
-	r.Get("/kitchen/{id}", s.KitchenById)
+	r.Get("/kitchen/{slug}", s.KitchenBySlug)
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }
