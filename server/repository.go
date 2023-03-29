@@ -11,18 +11,19 @@ import (
 )
 
 type Kitchen struct {
-	ID          int8       `json:"id"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-	Name        string     `json:"name"`
-	Logo        NullString `json:"logo"`
-	Description NullString `json:"description"`
-	WebsiteLink NullString `json:"website_link"`
-	ParentID    NullInt64  `json:"parent_id"`
-	Type        string     `json:"type"`
-	Slug        string     `json:"slug"`
-	ParentName  NullString `json:"parent_name"`
-	ParentLink  NullString `json:"parent_link"`
+	ID           int8       `json:"id"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
+	Name         string     `json:"name"`
+	Logo         NullString `json:"logo"`
+	Description  NullString `json:"description"`
+	WebsiteLink  NullString `json:"website_link"`
+	ParentID     NullInt64  `json:"parent_id"`
+	Type         string     `json:"type"`
+	DoorDashLink NullString `json:"doordash_link"`
+	Slug         string     `json:"slug"`
+	ParentName   NullString `json:"parent_name"`
+	ParentLink   NullString `json:"parent_link"`
 }
 
 type Location struct {

@@ -29,7 +29,7 @@ func (s *Server) Kitchens(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var kitchen Kitchen
-		if err := rows.Scan(&kitchen.ID, &kitchen.CreatedAt, &kitchen.UpdatedAt, &kitchen.Name, &kitchen.Logo, &kitchen.Description, &kitchen.WebsiteLink, &kitchen.ParentID, &kitchen.Type, &kitchen.Slug, &kitchen.ParentName, &kitchen.ParentLink); err != nil {
+		if err := rows.Scan(&kitchen.ID, &kitchen.CreatedAt, &kitchen.UpdatedAt, &kitchen.Name, &kitchen.Logo, &kitchen.Description, &kitchen.WebsiteLink, &kitchen.ParentID, &kitchen.Type, &kitchen.Slug, &kitchen.DoorDashLink, &kitchen.ParentName, &kitchen.ParentLink); err != nil {
 			log.Fatalln(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -67,7 +67,7 @@ func (s *Server) KitchenBySlug(w http.ResponseWriter, r *http.Request) {
 	// Query for kitchen and its parent
 	row := s.DB.QueryRow("SELECT k.*, c.name AS \"parent_name\", c.website_link AS \"parent_link\" FROM kitchens k LEFT JOIN companies c ON k.parent_id = c.id WHERE k.slug = $1", slug)
 
-	switch err := row.Scan(&kitchen.ID, &kitchen.CreatedAt, &kitchen.UpdatedAt, &kitchen.Name, &kitchen.Logo, &kitchen.Description, &kitchen.WebsiteLink, &kitchen.ParentID, &kitchen.Type, &kitchen.Slug, &kitchen.ParentName, &kitchen.ParentLink); err {
+	switch err := row.Scan(&kitchen.ID, &kitchen.CreatedAt, &kitchen.UpdatedAt, &kitchen.Name, &kitchen.Logo, &kitchen.Description, &kitchen.WebsiteLink, &kitchen.ParentID, &kitchen.Type, &kitchen.Slug, &kitchen.DoorDashLink, &kitchen.ParentName, &kitchen.ParentLink); err {
 	case sql.ErrNoRows:
 		fmt.Println("No rows were returned!")
 	case nil:
