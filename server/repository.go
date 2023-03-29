@@ -27,17 +27,17 @@ type Kitchen struct {
 }
 
 type Location struct {
-	ID           int8       `json:"id"`
-	CreatedAt    time.Time  `json:"created_at"`
-	UpdatedAt    time.Time  `json:"updated_at"`
-	KitchenID    int8       `json:"kitchen_id"`
-	Address1     string     `json:"address_1"`
-	Address2     NullString `json:"address_2"`
-	City         string     `json:"city"`
-	State        string     `json:"state"`
-	Country      string     `json:"country"`
-	ZipCode      string     `json:"zip_code"`
-	GoogleRating float64    `json:"google_rating"`
+	ID           int8        `json:"id"`
+	CreatedAt    time.Time   `json:"created_at"`
+	UpdatedAt    time.Time   `json:"updated_at"`
+	KitchenID    int8        `json:"kitchen_id"`
+	Address1     string      `json:"address_1"`
+	Address2     NullString  `json:"address_2"`
+	City         string      `json:"city"`
+	State        string      `json:"state"`
+	Country      string      `json:"country"`
+	ZipCode      string      `json:"zip_code"`
+	GoogleRating NullFloat64 `json:"google_rating"`
 }
 type Company struct {
 	ID          int8       `json:"id"`
