@@ -36,7 +36,7 @@ type Location struct {
 	State        string     `json:"state"`
 	Country      string     `json:"country"`
 	ZipCode      string     `json:"zip_code"`
-	GoogleRating string     `json:"google_rating"`
+	GoogleRating float64    `json:"google_rating"`
 }
 type Company struct {
 	ID          int8       `json:"id"`

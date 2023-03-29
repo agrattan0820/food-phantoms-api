@@ -88,7 +88,7 @@ func (s *Server) KitchenBySlug(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var location Location
-		if err := rows.Scan(&location.ID, &location.CreatedAt, &location.UpdatedAt, &location.KitchenID, &location.City, &location.State, &location.Country, &location.ZipCode, &location.GoogleRating, &location.Address1, &location.Address2); err != nil {
+		if err := rows.Scan(&location.ID, &location.CreatedAt, &location.UpdatedAt, &location.KitchenID, &location.Address1, &location.City, &location.State, &location.Country, &location.ZipCode, &location.GoogleRating, &location.Address2); err != nil {
 			log.Fatalln(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
