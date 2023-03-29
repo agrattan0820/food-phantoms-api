@@ -109,7 +109,7 @@ func (s *Server) KitchenBySlug(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var company Company
-		if err := rows.Scan(&company.ID, &company.CreatedAt, &company.UpdatedAt, &company.Name, &company.Description, &company.Logo, &company.WebsiteLink); err != nil {
+		if err := rows.Scan(&company.ID, &company.CreatedAt, &company.Name, &company.Description, &company.Logo, &company.WebsiteLink, &company.UpdatedAt); err != nil {
 			log.Fatalln(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
