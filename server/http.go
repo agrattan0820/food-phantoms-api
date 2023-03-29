@@ -70,6 +70,8 @@ func (s *Server) KitchenBySlug(w http.ResponseWriter, r *http.Request) {
 	switch err := row.Scan(&kitchen.ID, &kitchen.CreatedAt, &kitchen.UpdatedAt, &kitchen.Name, &kitchen.Logo, &kitchen.Description, &kitchen.WebsiteLink, &kitchen.ParentID, &kitchen.Type, &kitchen.Slug, &kitchen.DoorDashLink, &kitchen.ParentName, &kitchen.ParentLink); err {
 	case sql.ErrNoRows:
 		fmt.Println("No rows were returned!")
+		w.WriteHeader(http.StatusNotFound)
+		return
 	case nil:
 		fmt.Println(kitchen)
 		kitchens = append(kitchens, kitchen)
