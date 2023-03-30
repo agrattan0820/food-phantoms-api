@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 
@@ -140,4 +141,42 @@ func (s *Server) KitchenBySlug(w http.ResponseWriter, r *http.Request) {
 	payload = TrimKitchen(payload)
 
 	w.Write(payload)
+}
+
+type AddKitchenRequest struct {
+	Name         *string `json:"name"`
+	DoorDashLink *string `json:"doordash_link"`
+	WebsiteLink  *string `json:"website_link"`
+	Parent       *string `json:"parent"`
+}
+
+func (s *Server) AddKitchen(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Println("Failed to read body:", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	data := &AddKitchenRequest{}
+
+	if err := json.Unmarshal(body, &data); err != nil {
+		log.Println("Failed to unmarshal payload:", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	sqlStatement := `
+INSERT INTO kitchen_requests (kitchen_name, doordash_link, website_link, parent)
+VALUES ($1, $2, $3, $4)
+RETURNING id`
+	id := 0
+	err = s.DB.QueryRow(sqlStatement, data.Name, data.DoorDashLink, data.WebsiteLink).Scan(&id)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("New Kitchen Request ID is:", id)
+
+	w.Write([]byte("Success"))
 }

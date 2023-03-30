@@ -65,5 +65,6 @@ func main() {
 	})
 	r.Get("/kitchens", s.Kitchens)
 	r.Get("/kitchen/{slug}", s.KitchenBySlug)
+	r.Post("/add-kitchen", s.AddKitchen)
 	log.Fatal(http.ListenAndServe(":"+port, r))
 }
