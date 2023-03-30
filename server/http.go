@@ -172,7 +172,7 @@ INSERT INTO kitchen_requests (kitchen_name, doordash_link, website_link, parent)
 VALUES ($1, $2, $3, $4)
 RETURNING id`
 	id := 0
-	err = s.DB.QueryRow(sqlStatement, data.Name, data.DoorDashLink, data.WebsiteLink).Scan(&id)
+	err = s.DB.QueryRow(sqlStatement, data.Name, data.DoorDashLink, data.WebsiteLink, data.Parent).Scan(&id)
 	if err != nil {
 		panic(err)
 	}
